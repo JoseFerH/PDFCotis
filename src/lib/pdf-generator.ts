@@ -21,10 +21,6 @@ export const generateQuotePdf = (data: QuoteFormValues) => {
   const secondaryColor = "#B4A5A5";
   const textColor = "#333333";
   const whiteColor = "#FFFFFF";
-
-  // Fonts
-  doc.addFont("helvetica", "normal", "normal");
-  doc.addFont("helvetica", "bold", "bold");
   
   // --- PDF Header ---
   y = 0;
