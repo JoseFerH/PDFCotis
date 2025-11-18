@@ -4,9 +4,9 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('es-MX', {
-    style: 'currency',
-    currency: 'MXN', // Or a generic currency
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
   }).format(amount);
 };
 
@@ -14,88 +14,140 @@ export const generateQuotePdf = (data: QuoteFormValues) => {
   const doc = new jsPDF();
   const pageHeight = doc.internal.pageSize.height;
   const pageWidth = doc.internal.pageSize.width;
-  let y = 20;
+  let y = 0;
 
+  // Colors
+  const primaryColor = "#2B2A4C";
+  const secondaryColor = "#B4A5A5";
+  const textColor = "#333333";
+  const whiteColor = "#FFFFFF";
+
+  // Fonts
+  doc.addFont("helvetica", "normal", "normal");
+  doc.addFont("helvetica", "bold", "bold");
+  
   // --- PDF Header ---
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.setTextColor("#3498db"); // Primary color
-  doc.text("COTIZACIÓN", pageWidth / 2, y, { align: "center" });
-  y += 10;
+  y = 0;
+  doc.setFillColor(primaryColor);
+  doc.rect(0, y, pageWidth, 30, "F");
 
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(whiteColor);
+  doc.text("Creati", 20, 15);
+  doc.setFont("helvetica", "normal");
+  doc.text("Studio", 42, 15);
+  
+  doc.setFontSize(10);
+  doc.text("Creamos tus ideas", pageWidth - 20, 18, { align: "right" });
+  y = 35;
+  
+  // --- Quote Details ---
+  doc.setFontSize(9);
+  doc.setTextColor(textColor);
+  
+  const fieldHeight = 7;
+  const fieldBorderRadius = 3;
+
+  // Client and Contact
+  doc.setFillColor(primaryColor);
+  doc.roundedRect(20, y, 25, fieldHeight, fieldBorderRadius, fieldBorderRadius, "F");
+  doc.setTextColor(whiteColor);
+  doc.setFont("helvetica", "bold");
+  doc.text("Cliente:", 23, y + 5);
+  
+  doc.roundedRect(20, y + 10, 25, fieldHeight, fieldBorderRadius, fieldBorderRadius, "F");
+  doc.text("Contacto:", 23, y + 15);
+  
+  doc.setTextColor(textColor);
+  doc.setFont("helvetica", "normal");
+  doc.text(data.clientName, 50, y + 5);
+  doc.text(data.contact, 50, y + 15);
+
+
+  // Quote Number and Date
+  const quoteNoX = pageWidth - 80;
+  doc.setFont("helvetica", "bold");
+  doc.text("Cotización No.", quoteNoX, y + 5);
+  doc.text("Fecha de cotización:", quoteNoX, y + 15);
+  
+  doc.setFillColor(primaryColor);
+  doc.roundedRect(quoteNoX + 40, y + 1, 35, fieldHeight, fieldBorderRadius, fieldBorderRadius, "F");
+  doc.roundedRect(quoteNoX + 40, y + 11, 35, fieldHeight, fieldBorderRadius, fieldBorderRadius, "F");
+
+  doc.setTextColor(whiteColor);
+  doc.setFont("helvetica", "normal");
+  doc.text(data.quoteNumber, quoteNoX + 42, y + 6);
+  doc.text(format(data.quoteDate, "dd/MM/yyyy", { locale: es }), quoteNoX + 42, y + 16);
+  
+  y += 30;
+
+  // --- Intro Text ---
+  doc.setTextColor(textColor);
+  doc.setFont("helvetica", "bold");
+  doc.text("Estimado/a cliente:", 20, y);
+  y += 5;
+  doc.setFont("helvetica", "normal");
+  const introText = "Adjuntamos la cotización detallada que ha solicitado. En Creati nos complace ofrecer soluciones de alta calidad y a medida para sus necesidades.";
+  const splitIntro = doc.splitTextToSize(introText, pageWidth - 40);
+  doc.text(splitIntro, 20, y);
+  y += (splitIntro.length * 5) + 10;
+  
+  
+  // --- Items Table ---
+  const tableStartY = y;
+  const tableHeaderHeight = 10;
+  const tableBottomMargin = 90;
+
+  // Table Header
+  doc.setFillColor(primaryColor);
+  doc.roundedRect(20, y, pageWidth - 40, tableHeaderHeight, 5, 5, "F");
+  doc.setTextColor(whiteColor);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("Descripción", 25, y + 7);
+  doc.text("Precio", pageWidth - 25, y + 7, { align: "right" });
+  y += tableHeaderHeight + 5;
+  
+  // Table Rows
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.setTextColor(100);
-  // Add company details (placeholder)
-  doc.text("Tu Nombre/Empresa", 20, y);
-  doc.text("tu.email@example.com", pageWidth - 20, y, { align: "right" });
-  y += 5;
-  doc.text("Calle Falsa 123, Ciudad", 20, y);
-  doc.text("+1 (23) 456-7890", pageWidth - 20, y, { align: "right" });
-  y += 10;
+  doc.setTextColor(textColor);
 
-  doc.setDrawColor(236, 240, 241); // background color lightened
-  doc.setLineWidth(0.5);
-  doc.line(15, y, pageWidth - 15, y);
-  y += 10;
-
-  // --- Quote Details ---
-  doc.setFontSize(12);
-  doc.setTextColor(40);
-  
-  doc.setFont("helvetica", "bold");
-  doc.text("Cliente:", 20, y);
-  doc.setFont("helvetica", "normal");
-  doc.text(data.clientName, 45, y);
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Cotización No:", pageWidth - 70, y);
-  doc.setFont("helvetica", "normal");
-  doc.text(data.quoteNumber, pageWidth - 20, y, { align: "right" });
-  y += 7;
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Contacto:", 20, y);
-  doc.setFont("helvetica", "normal");
-  doc.text(data.contact, 45, y);
-
-  doc.setFont("helvetica", "bold");
-  doc.text("Fecha:", pageWidth - 70, y);
-  doc.setFont("helvetica", "normal");
-  doc.text(format(data.quoteDate, "dd 'de' MMMM, yyyy", { locale: es }), pageWidth - 20, y, { align: "right" });
-  y += 15;
-
-  // --- Items Table Header ---
-  doc.setFillColor(236, 240, 241); // Light gray background
-  doc.rect(15, y, pageWidth - 30, 10, "F");
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(40);
-  doc.text("Descripción del Servicio/Producto", 20, y + 7);
-  doc.text("Precio", pageWidth - 20, y + 7, { align: "right" });
-  y += 15;
-
-  // --- Items Table Rows ---
-  doc.setFont("helvetica", "normal");
   data.items.forEach((item) => {
-    if (y > pageHeight - 40) {
+    if (y > pageHeight - tableBottomMargin) {
       doc.addPage();
       y = 20;
     }
-    const splitDescription = doc.splitTextToSize(item.description, (pageWidth - 90));
-    doc.text(splitDescription, 20, y);
-    doc.text(formatCurrency(item.price), pageWidth - 20, y, { align: "right" });
-    y += (splitDescription.length * 5) + 5;
+    const priceText = formatCurrency(item.price);
+    const priceWidth = doc.getTextWidth(priceText) + 5;
+    const descriptionWidth = pageWidth - 50 - priceWidth;
+    
+    const splitDescription = doc.splitTextToSize(item.description, descriptionWidth);
+    
+    const itemLineHeight = (splitDescription.length * 5) + 5;
+
+    if (y + itemLineHeight > pageHeight - tableBottomMargin) {
+        doc.addPage();
+        y = 20;
+    }
+
+    doc.text(splitDescription, 25, y);
+    doc.text(priceText, pageWidth - 25, y, { align: "right" });
+    y += itemLineHeight;
   });
 
   // --- Totals Section ---
-  y += 10;
-  if (y > pageHeight - 60) {
-      doc.addPage();
-      y = 20;
+  const totalsYStart = pageHeight - 80;
+  if(y < totalsYStart) {
+    y = totalsYStart;
+  } else {
+    y += 5;
   }
   
-  const totalsX = pageWidth - 70;
-  
+  const totalsX = pageWidth - 90;
+  const totalValueX = pageWidth - 25;
+
   const subtotal = data.items.reduce((acc, item) => acc + item.price, 0);
   const discountPercentage = data.includeDiscount ? parseInt(data.discountPercentage || "0", 10) : 0;
   const discountAmount = (subtotal * discountPercentage) / 100;
@@ -103,38 +155,68 @@ export const generateQuotePdf = (data: QuoteFormValues) => {
   const iva = totalAfterDiscount * 0.16;
   const total = totalAfterDiscount + iva;
 
+  doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Subtotal:", totalsX, y);
-  doc.text(formatCurrency(subtotal), pageWidth - 20, y, { align: "right" });
+  doc.text("Total sin descuento:", totalsX, y, {align: "right"});
+  doc.text(formatCurrency(subtotal), totalValueX, y, { align: "right" });
   y += 7;
 
   if (data.includeDiscount && discountAmount > 0) {
-    doc.setTextColor(220, 53, 69); // Destructive color
-    doc.text(`Descuento (${discountPercentage}%):`, totalsX, y);
-    doc.text(`-${formatCurrency(discountAmount)}`, pageWidth - 20, y, { align: "right" });
+    doc.setTextColor("#d9534f"); // Red for discount
+    doc.setFont("helvetica", "bold");
+    doc.text("Descuento:", totalsX, y, {align: "right"});
+    doc.text(`-${formatCurrency(discountAmount)}`, totalValueX, y, { align: "right" });
     y += 7;
-    doc.setTextColor(40);
+    doc.setTextColor(textColor);
+    doc.setFont("helvetica", "normal");
+
+    doc.text("Total con descuento:", totalsX, y, {align: "right"});
+    doc.text(formatCurrency(totalAfterDiscount), totalValueX, y, { align: "right" });
+    y += 7;
   }
-
-  doc.text("IVA (16%):", totalsX, y);
-  doc.text(formatCurrency(iva), pageWidth - 20, y, { align: "right" });
-  y += 7;
-
-  doc.setLineWidth(0.2);
-  doc.line(totalsX - 5, y, pageWidth - 15, y);
+  
+  doc.text("IVA (16%):", totalsX, y, {align: "right"});
+  doc.text(formatCurrency(iva), totalValueX, y, { align: "right" });
   y += 7;
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("TOTAL:", totalsX, y);
-  doc.text(formatCurrency(total), pageWidth - 20, y, { align: "right" });
-  y += 15;
+  doc.setFontSize(12);
+  doc.text("TOTAL:", totalsX, y, {align: "right"});
+  doc.setFillColor("#E9F5FF");
+  doc.roundedRect(totalsX + 2, y - 5, 60, 8, 3, 3, "F");
+  doc.text(formatCurrency(total), totalValueX, y, { align: "right" });
+  y += 10;
+  
+  // Dashed line for table
+  doc.setLineDashPattern([1, 1], 0);
+  doc.setDrawColor(secondaryColor);
+  doc.line(totalsX - 5, tableStartY + tableHeaderHeight, totalsX - 5, y -10);
+  doc.setLineDashPattern([], 0);
 
-  // --- Footer ---
-  doc.setFontSize(9);
-  doc.setTextColor(150);
-  const terms = "Precios sujetos a cambio sin previo aviso. Validez de la cotización: 30 días.";
-  doc.text(terms, pageWidth / 2, pageHeight - 15, { align: "center" });
+  // Table container
+  doc.setDrawColor(primaryColor);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(18, tableStartY -2, pageWidth - 36, y - tableStartY + 2, 8, 8, "S");
+  
+
+  // --- Terms ---
+  y = pageHeight - 35;
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  const termsText = "Este presupuesto es válido por 10 días a partir de su fecha de emisión y está diseñado específicamente para responder a las necesidades actuales de la empresa, considerando su tipo, sector, y los requisitos para la futura implementación de la solución propuesta.";
+  const splitTerms = doc.splitTextToSize(termsText, pageWidth - 40);
+  doc.text(splitTerms, pageWidth / 2, y, { align: "center" });
+
+  // --- PDF Footer ---
+  doc.setFillColor(primaryColor);
+  doc.rect(0, pageHeight - 15, pageWidth, 15, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(whiteColor);
+  doc.text("Creati Studio", 20, pageHeight - 6);
+  
+  const footerText = "Diseño | Publicidad   📞 30165995";
+  doc.text(footerText, pageWidth - 20, pageHeight - 6, { align: "right" });
 
   doc.save(`cotizacion-${data.quoteNumber}.pdf`);
 };
