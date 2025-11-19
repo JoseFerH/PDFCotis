@@ -83,6 +83,7 @@ const formatCurrency = (amount: number) => {
 export function QuoteGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
 
   const generateQuoteNumber = () => {
     const date = new Date();
@@ -97,7 +98,6 @@ export function QuoteGenerator() {
     resolver: zodResolver(quoteSchema),
     defaultValues: {
       quoteNumber: "",
-      quoteDate: new Date(),
       clientName: "",
       contact: "",
       items: [{ description: "", price: 0 }],
@@ -113,7 +113,10 @@ export function QuoteGenerator() {
 
   useEffect(() => {
     form.setValue("quoteNumber", generateQuoteNumber());
+    form.setValue("quoteDate", new Date());
+    setIsClient(true);
   }, [form]);
+
 
   const watchedItems = form.watch("items");
   const includeDiscount = form.watch("includeDiscount");
@@ -152,6 +155,10 @@ export function QuoteGenerator() {
     }
   };
 
+  if (!isClient) {
+    return null;
+  }
+  
   return (
     <Card className="w-full max-w-4xl mx-auto shadow-2xl">
       <Form {...form}>
