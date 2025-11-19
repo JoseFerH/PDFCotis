@@ -15,9 +15,9 @@ const TOTALS_START_Y = 185;
 const NOTE_Y = 125;
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("es-MX", {
+  return new Intl.NumberFormat("es-GT", {
     style: "currency",
-    currency: "MXN",
+    currency: "GTQ",
     maximumFractionDigits: 2,
   }).format(amount);
 };
@@ -284,3 +284,5 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
+
+    

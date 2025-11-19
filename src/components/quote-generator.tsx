@@ -74,9 +74,9 @@ const quoteSchema = z.object({
 export type QuoteFormValues = z.infer<typeof quoteSchema>;
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("es-GT", {
     style: "currency",
-    currency: "USD",
+    currency: "GTQ",
   }).format(amount);
 };
 
@@ -406,3 +406,5 @@ export function QuoteGenerator() {
     </Card>
   );
 }
+
+    
