@@ -135,10 +135,10 @@ export function QuoteGenerator() {
   const iva = totalAfterDiscount * 0.16;
   const total = totalAfterDiscount + iva;
 
-  const onSubmit = (data: QuoteFormValues) => {
+  const onSubmit = async (data: QuoteFormValues) => {
     setIsLoading(true);
     try {
-      generateQuotePdf(data);
+      await generateQuotePdf(data);
       toast({
         title: "PDF Generado",
         description: "La cotización ha sido generada y descargada.",
