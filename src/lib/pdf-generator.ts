@@ -19,7 +19,8 @@ const formatCurrency = (amount: number) => {
     style: "currency",
     currency: "GTQ",
     maximumFractionDigits: 2,
-  }).format(amount);
+    currencyDisplay: "code"
+  }).format(amount).replace("GTQ", "Q");
 };
 
 const wrapText = (text: string, font: PDFFont, fontSize: number, maxWidth: number) => {
@@ -78,7 +79,7 @@ const drawClientBlock = (
     color: textColor,
   });
 
-  const formattedDate = format(data.quoteDate, "dd 'de' MMMM yyyy", { locale: es });
+  const formattedDate = data.quoteDate ? format(data.quoteDate, "dd 'de' MMMM yyyy", { locale: es }) : '';
 
   page.drawText(data.quoteNumber, {
     x: rightX,
@@ -284,5 +285,3 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
-
-    
