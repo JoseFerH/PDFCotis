@@ -239,7 +239,7 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
     : 0;
   const discountAmount = (subtotal * discountPercentage) / 100;
   const totalAfterDiscount = subtotal - discountAmount;
-  const iva = totalAfterDiscount * 0.16;
+  const iva = totalAfterDiscount * 0.12;
   const total = totalAfterDiscount + iva;
 
   const totalsRows = [
@@ -251,7 +251,7 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
     totalsRows.push({ label: "Subtotal con descuento:", value: formatCurrency(totalAfterDiscount) });
   }
 
-  totalsRows.push({ label: "IVA (16%):", value: formatCurrency(iva) });
+  totalsRows.push({ label: "IVA (12%):", value: formatCurrency(iva) });
   totalsRows.push({ label: "Total:", value: formatCurrency(total), emphasize: true });
 
   drawTotals(lastItemsPage, fonts, totalsRows);
