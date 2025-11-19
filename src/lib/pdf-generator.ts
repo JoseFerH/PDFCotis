@@ -58,6 +58,7 @@ const drawClientBlock = (
 ) => {
   const primaryColor = rgb(43 / 255, 42 / 255, 76 / 255);
   const textColor = rgb(38 / 255, 38 / 255, 38 / 255);
+  const whiteColor = rgb(1, 1, 1);
   const leftX = 120;
   const rightX = pageWidth - 230;
   const baseY = pageHeight - 180;
@@ -86,7 +87,7 @@ const drawClientBlock = (
     y: baseY,
     size: 11,
     font: fonts.bold,
-    color: textColor,
+    color: whiteColor,
   });
 
   page.drawText(formattedDate, {
@@ -94,7 +95,7 @@ const drawClientBlock = (
     y: baseY - lineHeight,
     size: 11,
     font: fonts.regular,
-    color: textColor,
+    color: whiteColor,
   });
 };
 
