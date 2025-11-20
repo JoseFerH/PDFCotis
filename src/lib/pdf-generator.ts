@@ -10,9 +10,9 @@ const TABLE_DESCRIPTION_X = 85;
 const TABLE_PRICE_X = 505;
 const DESCRIPTION_WIDTH = 360;
 const TABLE_ROW_GAP = 18;
-const TABLE_START_OFFSET = 320;
+const TABLE_START_OFFSET = 340;
 const TABLE_BOTTOM_LIMIT = 210;
-const TOTALS_START_Y = 185;
+const TOTALS_START_Y = 201;
 const NOTE_Y = 125;
 
 const formatCurrency = (amount: number) => {
@@ -98,44 +98,49 @@ const drawFirstPageDetails = (
   data: QuoteFormValues,
   pageHeight: number,
 ) => {
-  const startX = 85;
+  const startX = 95;
   const width = 440;
-  let currentY = pageHeight - 170;
+  let currentY = pageHeight - 167;
 
-  currentY = drawLabeledContent(page, fonts, "Cliente", data.clientName, startX, currentY, width, {
-    labelSize: 12,
+  currentY = drawLabeledContent(page, fonts, "", data.clientName, startX, currentY+4, width, {
+    labelSize: 11,
   });
   currentY = drawLabeledContent(
     page,
     fonts,
-    "Duración del Trabajo",
+    "",
     data.workDuration,
-    startX,
-    currentY,
+    startX+80,
+    currentY+5,
     width,
   );
-  currentY = drawLabeledContent(page, fonts, "Método", data.method, startX, currentY, width);
-  currentY = drawLabeledContent(page, fonts, "Proveedor", data.provider, startX, currentY, width);
+  currentY = drawLabeledContent(page, fonts, "", data.method, startX, currentY+5, width);
+  currentY = drawLabeledContent(page, fonts, "", data.provider, startX+20, currentY+5, width);
   const formattedDate = data.quoteDate
     ? format(data.quoteDate, "dd/MM/yyyy")
     : "";
   currentY = drawLabeledContent(
     page,
     fonts,
-    "Fecha de Cotización",
+    "",
     formattedDate,
-    startX,
-    currentY,
+    startX-5,
+    currentY+6,
     width,
   );
 
-  currentY = drawLabeledContent(
+  // Absolute positions
+  const serviceGoalY = 575;
+  const serviceIncludesY = 375;
+  const commonX = 40;
+
+  drawLabeledContent(
     page,
     fonts,
     "Objetivo del Servicio",
     data.serviceGoal,
-    startX,
-    currentY - 12,
+    commonX,
+    serviceGoalY,
     width,
     { lineGap: 20 },
   );
@@ -145,8 +150,8 @@ const drawFirstPageDetails = (
     fonts,
     "Lo que Incluye el Servicio",
     data.serviceIncludes,
-    startX,
-    currentY,
+    commonX,
+    serviceIncludesY,
     width,
     { lineGap: 0 },
   );
@@ -160,25 +165,29 @@ const drawSecondPageDetails = (
 ) => {
   const startX = 85;
   const width = 440;
-  let currentY = pageHeight - 180;
+  
+  // Absolute positions
+  const deliveryTimeY = pageHeight - 180;
+  const includedBonusY = pageHeight - 280;
+  const whyCreatiY = pageHeight - 420;
 
-  currentY = drawLabeledContent(
+  drawLabeledContent(
     page,
     fonts,
     "Tiempo de Entrega",
     data.deliveryTime,
     startX,
-    currentY,
+    deliveryTimeY,
     width,
   );
 
-  currentY = drawLabeledContent(
+  drawLabeledContent(
     page,
     fonts,
     "Bonus Incluido",
     data.includedBonus,
     startX,
-    currentY,
+    includedBonusY,
     width,
   );
 
@@ -188,7 +197,7 @@ const drawSecondPageDetails = (
     "¿Por qué hacerlo con Creati Solutions?",
     data.whyCreati,
     startX,
-    currentY,
+    whyCreatiY,
     width,
     { lineGap: 0 },
   );
@@ -212,7 +221,7 @@ const drawThirdPageHeader = (
   page.drawText(data.clientName, {
     x: leftX,
     y: baseY+20,
-    size: 12,
+    size: 10,
     font: fonts.bold,
     color: primaryColor,
   });
@@ -220,9 +229,9 @@ const drawThirdPageHeader = (
   page.drawText(data.contact, {
     x: leftX,
     y: baseY - lineHeight,
-    size: 11,
+    size: 10,
     font: fonts.regular,
-    color: textColor,
+    color: primaryColor,
   });
 
   const formattedDate = data.quoteDate
@@ -240,7 +249,7 @@ const drawThirdPageHeader = (
   page.drawText(formattedDate, {
     x: rightX,
     y: baseY - lineHeight,
-    size: 11,
+    size: 10,
     font: fonts.regular,
     color: whiteColor,
   });
@@ -293,7 +302,7 @@ const drawItemsTable = async (
       currentPage.drawText(line, {
         x: TABLE_DESCRIPTION_X,
         y: currentY - lineIndex * descriptionLineHeight,
-        size: 11,
+        size: 10,
         font: fonts.regular,
         color: textColor,
       });
@@ -321,7 +330,7 @@ const drawTotals = (
   totals: { label: string; value: string; emphasize?: boolean }[],
 ) => {
   let currentY = TOTALS_START_Y;
-  const labelX = 375;
+  const labelX = 310;
   const valueX = 520;
   const lineGap = 18;
   const textColor = rgb(35 / 255, 35 / 255, 35 / 255);
@@ -408,18 +417,18 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   ];
 
   if (discountAmount > 0) {
-    totalsRows.push({ label: "Descuento:", value: `- ${formatCurrency(discountAmount)}` });
+    totalsRows.push({ label: `Descuento (${discountPercentage}%):`, value: `- ${formatCurrency(discountAmount)}` });
     totalsRows.push({ label: "Subtotal con descuento:", value: formatCurrency(totalAfterDiscount) });
   }
 
   totalsRows.push({ label: "IVA (12%):", value: formatCurrency(iva) });
-  totalsRows.push({ label: "Total:", value: formatCurrency(total), emphasize: true });
+  totalsRows.push({ label: "TOTAL:", value: formatCurrency(total), emphasize: true });
 
   drawTotals(lastItemsPage, fonts, totalsRows);
 
   const discountNote = data.includeDiscount && discountPercentage > 0
     ? `Descuento aplicado: ${discountPercentage}% (${formatCurrency(discountAmount)}).`
-    : "Precios sujetos a cambios sin previo aviso.";
+    : "";
 
   lastItemsPage.drawText(discountNote, {
     x: TABLE_DESCRIPTION_X,
@@ -440,5 +449,3 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
-
-    
