@@ -321,7 +321,7 @@ const drawItemsTable = async (
       });
     });
 
-    const priceText = formatCurrency(item.price);
+    const priceText = `${item.isEstimate ? '*' : ''}${formatCurrency(item.price)}`;
     const priceWidth = fonts.regular.widthOfTextAtSize(priceText, 11);
     currentPage.drawText(priceText, {
       x: TABLE_PRICE_X - priceWidth,
@@ -462,5 +462,3 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
-
-    

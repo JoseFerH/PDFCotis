@@ -63,6 +63,7 @@ const lineItemSchema = z.object({
     numberFromInput,
     z.number().positive("El precio debe ser un número positivo.")
   ),
+  isEstimate: z.boolean().optional(),
 });
 
 const quoteSchema = z.object({
@@ -136,7 +137,7 @@ export function QuoteGenerator() {
       deliveryTime: "",
       includedBonus: "",
       whyCreati: "",
-      items: [{ description: "", price: 0 }],
+      items: [{ description: "", price: 0, isEstimate: false }],
       includeDiscount: false,
       discountPercentage: 0,
     },
@@ -441,7 +442,8 @@ export function QuoteGenerator() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[60%]">Descripción</TableHead>
+                    <TableHead className="w-[55%]">Descripción</TableHead>
+                    <TableHead>Precio Estimado</TableHead>
                     <TableHead className="text-right">Precio</TableHead>
                     <TableHead className="w-12"></TableHead>
                   </TableRow>
@@ -462,6 +464,22 @@ export function QuoteGenerator() {
                             </FormItem>
                           )}
                         />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                            control={form.control}
+                            name={`items.${index}.isEstimate`}
+                            render={({ field }) => (
+                              <FormItem className="flex justify-center items-center h-full">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
                       </TableCell>
                       <TableCell>
                         <FormField
@@ -497,7 +515,7 @@ export function QuoteGenerator() {
                 variant="outline"
                 size="sm"
                 className="mt-4"
-                onClick={() => append({ description: "", price: 0 })}
+                onClick={() => append({ description: "", price: 0, isEstimate: false })}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Agregar Ítem
@@ -576,5 +594,3 @@ export function QuoteGenerator() {
     </Card>
   );
 }
-
-    
