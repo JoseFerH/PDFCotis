@@ -196,8 +196,8 @@ const drawSecondPageDetails = (
   
   // Absolute positions
   const deliveryTimeY = pageHeight - 165;
-  const includedBonusY = pageHeight - 246;
-  const whyCreatiY = pageHeight - 355;
+  const includedBonusY = pageHeight - 239;
+  const whyCreatiY = pageHeight - 345;
 
   drawLabeledContent(
     page,
