@@ -27,6 +27,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
@@ -46,10 +47,19 @@ import { generateQuotePdf } from "@/lib/pdf-generator";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "./ui/separator";
 
+const numberFromInput = (value: unknown) => {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  const parsed = typeof value === "number" ? value : parseFloat(String(value));
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
 const lineItemSchema = z.object({
   description: z.string().min(1, "La descripción es requerida."),
   price: z.preprocess(
-    (a) => parseFloat(z.string().parse(a)),
+    numberFromInput,
     z.number().positive("El precio debe ser un número positivo.")
   ),
 });
@@ -59,10 +69,30 @@ const quoteSchema = z.object({
   quoteDate: z.date({ required_error: "La fecha es requerida." }),
   clientName: z.string().min(1, "El nombre del cliente es requerido."),
   contact: z.string().min(1, "El contacto es requerido."),
+  workDuration: z
+    .string()
+    .min(1, "La duración del trabajo es requerida."),
+  method: z.string().min(1, "El método es requerido."),
+  provider: z.string().min(1, "El proveedor es requerido."),
+  serviceGoal: z
+    .string()
+    .min(1, "El objetivo del servicio es requerido."),
+  serviceIncludes: z
+    .string()
+    .min(1, "Debe indicar lo que incluye el servicio."),
+  deliveryTime: z
+    .string()
+    .min(1, "El tiempo de entrega es requerido."),
+  includedBonus: z
+    .string()
+    .min(1, "El bonus incluido es requerido."),
+  whyCreati: z
+    .string()
+    .min(1, "Explique por qué hacerlo con Creati Solutions."),
   items: z.array(lineItemSchema).min(1, "Debe agregar al menos un ítem."),
   includeDiscount: z.boolean(),
   discountPercentage: z.preprocess(
-    (a) => parseFloat(z.string().parse(a)),
+    numberFromInput,
     z.number().min(0, "El descuento no puede ser negativo.").max(100, "El descuento no puede ser mayor a 100.").optional()
   ).optional(),
 });
@@ -94,8 +124,17 @@ export function QuoteGenerator() {
     resolver: zodResolver(quoteSchema),
     defaultValues: {
       quoteNumber: "",
+      quoteDate: new Date(),
       clientName: "",
       contact: "",
+      workDuration: "",
+      method: "",
+      provider: "",
+      serviceGoal: "",
+      serviceIncludes: "",
+      deliveryTime: "",
+      includedBonus: "",
+      whyCreati: "",
       items: [{ description: "", price: 0 }],
       includeDiscount: false,
       discountPercentage: 0,
@@ -109,8 +148,8 @@ export function QuoteGenerator() {
 
   useEffect(() => {
     if (isClient) {
-        form.setValue("quoteNumber", generateQuoteNumber());
-        form.setValue("quoteDate", new Date());
+      form.setValue("quoteNumber", generateQuoteNumber());
+      form.setValue("quoteDate", new Date());
     }
   }, [form, isClient]);
 
@@ -201,6 +240,45 @@ export function QuoteGenerator() {
               />
               <FormField
                 control={form.control}
+                name="workDuration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duración del Trabajo</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej. 2 semanas" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="method"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Método</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej. Remoto / Presencial" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="provider"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Proveedor</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nombre del proveedor" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="quoteNumber"
                 render={({ field }) => (
                   <FormItem>
@@ -255,6 +333,94 @@ export function QuoteGenerator() {
             </div>
 
             <Separator />
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="serviceGoal"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Objetivo del Servicio</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describa el objetivo del servicio"
+                        className="min-h-[120px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="serviceIncludes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Lo que Incluye el Servicio</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Detalle los entregables o alcances incluidos"
+                        className="min-h-[120px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="deliveryTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tiempo de Entrega</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej. 5 días hábiles" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="includedBonus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bonus Incluido</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describa el bonus o beneficios incluidos"
+                        className="min-h-[120px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="whyCreati"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>¿Por qué hacerlo con Creati Solutions?</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Resalte los motivos o ventajas"
+                      className="min-h-[120px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div>
               <h3 className="text-lg font-semibold mb-4">Ítems de la Cotización</h3>
