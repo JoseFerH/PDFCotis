@@ -100,49 +100,39 @@ const drawFirstPageDetails = (
 ) => {
   const startX = 95;
   const width = 440;
-  
-  // Absolute Positions
-  const quoteTitleY = pageHeight - 240;
-  const clientNameY = pageHeight - 318;
-  const workDurationY = pageHeight - 350;
-  const methodY = pageHeight - 380;
-  const providerY = pageHeight - 410;
-  const dateY = pageHeight - 440;
-  const serviceGoalY = 460;
-  const serviceIncludesY = 280;
-  const commonX = 40;
+  let currentY = pageHeight - 167;
 
-  drawLabeledContent(page, fonts, "Título de la cotización", data.quoteTitle, commonX, quoteTitleY, width, {
-    labelSize: 14,
-    valueSize: 12
-  });
-
-  drawLabeledContent(page, fonts, "", data.clientName, startX, clientNameY, width, {
+  currentY = drawLabeledContent(page, fonts, "", data.clientName, startX, currentY+4, width, {
     labelSize: 11,
   });
-  drawLabeledContent(
+  currentY = drawLabeledContent(
     page,
     fonts,
     "",
     data.workDuration,
     startX+80,
-    workDurationY,
+    currentY+5,
     width,
   );
-  drawLabeledContent(page, fonts, "", data.method, startX, methodY, width);
-  drawLabeledContent(page, fonts, "", data.provider, startX+20, providerY, width);
+  currentY = drawLabeledContent(page, fonts, "", data.method, startX, currentY+5, width);
+  currentY = drawLabeledContent(page, fonts, "", data.provider, startX+20, currentY+5, width);
   const formattedDate = data.quoteDate
     ? format(data.quoteDate, "dd/MM/yyyy")
     : "";
-  drawLabeledContent(
+  currentY = drawLabeledContent(
     page,
     fonts,
     "",
     formattedDate,
     startX-5,
-    dateY,
+    currentY+6,
     width,
   );
+
+  // Absolute positions
+  const serviceGoalY = 460;
+  const serviceIncludesY = 280;
+  const commonX = 40;
 
   drawLabeledContent(
     page,
@@ -184,7 +174,7 @@ const drawSecondPageDetails = (
   drawLabeledContent(
     page,
     fonts,
-    "Tiempo de Entrega",
+    "",
     data.deliveryTime,
     startX,
     deliveryTimeY,
@@ -194,7 +184,7 @@ const drawSecondPageDetails = (
   drawLabeledContent(
     page,
     fonts,
-    "Bonus Incluido",
+    "",
     data.includedBonus,
     startX,
     includedBonusY,
@@ -204,7 +194,7 @@ const drawSecondPageDetails = (
   drawLabeledContent(
     page,
     fonts,
-    "¿Por qué hacerlo con Creati Solutions?",
+    "",
     data.whyCreati,
     startX,
     whyCreatiY,
