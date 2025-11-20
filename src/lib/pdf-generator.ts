@@ -203,14 +203,14 @@ const drawThirdPageHeader = (
   const primaryColor = rgb(43 / 255, 42 / 255, 76 / 255);
   const textColor = rgb(38 / 255, 38 / 255, 38 / 255);
   const whiteColor = rgb(1, 1, 1);
-  const leftX = 120;
-  const rightX = pageWidth - 230;
-  const baseY = pageHeight - 160;
+  const leftX = 140;
+  const rightX = pageWidth - 130;
+  const baseY = pageHeight - 158;
   const lineHeight = 18;
 
   page.drawText(data.clientName, {
     x: leftX,
-    y: baseY,
+    y: baseY+20,
     size: 12,
     font: fonts.bold,
     color: primaryColor,
@@ -225,12 +225,12 @@ const drawThirdPageHeader = (
   });
 
   const formattedDate = data.quoteDate
-    ? format(data.quoteDate, "dd 'de' MMMM yyyy", { locale: es })
+    ? format(data.quoteDate, "dd MMMM yyyy", { locale: es })
     : "";
 
   page.drawText(data.quoteNumber, {
     x: rightX,
-    y: baseY,
+    y: baseY+20,
     size: 11,
     font: fonts.bold,
     color: whiteColor,
