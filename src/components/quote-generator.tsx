@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -113,18 +114,16 @@ export function QuoteGenerator() {
 
   const generateQuoteNumber = () => {
     const date = new Date();
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const day = date.getDate().toString().padStart(2, "0");
+    const year = date.getFullYear().toString().slice(-2);
     const random = Math.floor(1000 + Math.random() * 9000);
-    return `COT-${year}${month}${day}-${random}`;
+    return `C${year}${random}`;
   };
 
   const form = useForm<QuoteFormValues>({
     resolver: zodResolver(quoteSchema),
     defaultValues: {
       quoteNumber: "",
-      quoteDate: new Date(),
+      quoteDate: undefined,
       clientName: "",
       contact: "",
       workDuration: "",
@@ -152,7 +151,7 @@ export function QuoteGenerator() {
       form.setValue("quoteDate", new Date());
     }
   }, [form, isClient]);
-
+  
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -307,7 +306,7 @@ export function QuoteGenerator() {
                             )}
                           >
                             {field.value ? (
-                              format(field.value, "PPP", { locale: es })
+                              format(field.value, "dd/MM/yyyy")
                             ) : (
                               <span>Seleccione una fecha</span>
                             )}
@@ -562,3 +561,5 @@ export function QuoteGenerator() {
     </Card>
   );
 }
+
+    

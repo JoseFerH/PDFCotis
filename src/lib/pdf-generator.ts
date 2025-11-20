@@ -1,3 +1,4 @@
+
 import { PDFDocument, rgb, StandardFonts, type PDFFont, type PDFPage } from "pdf-lib";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -116,7 +117,7 @@ const drawFirstPageDetails = (
   currentY = drawLabeledContent(page, fonts, "Método", data.method, startX, currentY, width);
   currentY = drawLabeledContent(page, fonts, "Proveedor", data.provider, startX, currentY, width);
   const formattedDate = data.quoteDate
-    ? format(data.quoteDate, "dd 'de' MMMM yyyy", { locale: es })
+    ? format(data.quoteDate, "dd/MM/yyyy")
     : "";
   currentY = drawLabeledContent(
     page,
@@ -225,13 +226,13 @@ const drawThirdPageHeader = (
   });
 
   const formattedDate = data.quoteDate
-    ? format(data.quoteDate, "dd MMMM yyyy", { locale: es })
+    ? format(data.quoteDate, "dd/MM/yyyy")
     : "";
 
   page.drawText(data.quoteNumber, {
     x: rightX,
     y: baseY+20,
-    size: 11,
+    size: 8,
     font: fonts.bold,
     color: whiteColor,
   });
@@ -439,3 +440,5 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
+
+    
