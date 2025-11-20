@@ -130,14 +130,14 @@ const drawFirstPageDetails = (
   );
 
   // Absolute positions
-  const serviceGoalY = 575;
-  const serviceIncludesY = 375;
+  const serviceGoalY = 460;
+  const serviceIncludesY = 280;
   const commonX = 40;
 
   drawLabeledContent(
     page,
     fonts,
-    "Objetivo del Servicio",
+    "",
     data.serviceGoal,
     commonX,
     serviceGoalY,
@@ -148,7 +148,7 @@ const drawFirstPageDetails = (
   drawLabeledContent(
     page,
     fonts,
-    "Lo que Incluye el Servicio",
+    "",
     data.serviceIncludes,
     commonX,
     serviceIncludesY,
@@ -163,18 +163,18 @@ const drawSecondPageDetails = (
   data: QuoteFormValues,
   pageHeight: number,
 ) => {
-  const startX = 85;
+  const startX = 40;
   const width = 440;
   
   // Absolute positions
-  const deliveryTimeY = pageHeight - 180;
-  const includedBonusY = pageHeight - 280;
-  const whyCreatiY = pageHeight - 420;
+  const deliveryTimeY = pageHeight - 165;
+  const includedBonusY = pageHeight - 246;
+  const whyCreatiY = pageHeight - 355;
 
   drawLabeledContent(
     page,
     fonts,
-    "Tiempo de Entrega",
+    "",
     data.deliveryTime,
     startX,
     deliveryTimeY,
@@ -184,7 +184,7 @@ const drawSecondPageDetails = (
   drawLabeledContent(
     page,
     fonts,
-    "Bonus Incluido",
+    "",
     data.includedBonus,
     startX,
     includedBonusY,
@@ -194,7 +194,7 @@ const drawSecondPageDetails = (
   drawLabeledContent(
     page,
     fonts,
-    "¿Por qué hacerlo con Creati Solutions?",
+    "",
     data.whyCreati,
     startX,
     whyCreatiY,
@@ -239,7 +239,7 @@ const drawThirdPageHeader = (
     : "";
 
   page.drawText(data.quoteNumber, {
-    x: rightX,
+    x: rightX+5,
     y: baseY+20,
     size: 8,
     font: fonts.bold,
@@ -413,16 +413,16 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   const total = totalAfterDiscount + iva;
 
   const totalsRows = [
-    { label: "Subtotal:", value: formatCurrency(subtotal) },
+    { label: "", value: formatCurrency(subtotal) },
   ];
 
   if (discountAmount > 0) {
     totalsRows.push({ label: `Descuento (${discountPercentage}%):`, value: `- ${formatCurrency(discountAmount)}` });
-    totalsRows.push({ label: "Subtotal con descuento:", value: formatCurrency(totalAfterDiscount) });
+    totalsRows.push({ label: "", value: formatCurrency(totalAfterDiscount) });
   }
 
   totalsRows.push({ label: "IVA (12%):", value: formatCurrency(iva) });
-  totalsRows.push({ label: "TOTAL:", value: formatCurrency(total), emphasize: true });
+  totalsRows.push({ label: "", value: formatCurrency(total), emphasize: true });
 
   drawTotals(lastItemsPage, fonts, totalsRows);
 
