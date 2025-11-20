@@ -41,13 +41,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { generateQuotePdf } from "@/lib/pdf-generator";
 import { useToast } from "@/hooks/use-toast";
@@ -68,7 +61,10 @@ const quoteSchema = z.object({
   contact: z.string().min(1, "El contacto es requerido."),
   items: z.array(lineItemSchema).min(1, "Debe agregar al menos un ítem."),
   includeDiscount: z.boolean(),
-  discountPercentage: z.string().optional(),
+  discountPercentage: z.preprocess(
+    (a) => parseFloat(z.string().parse(a)),
+    z.number().min(0, "El descuento no puede ser negativo.").max(100, "El descuento no puede ser mayor a 100.").optional()
+  ).optional(),
 });
 
 export type QuoteFormValues = z.infer<typeof quoteSchema>;
@@ -102,7 +98,7 @@ export function QuoteGenerator() {
       contact: "",
       items: [{ description: "", price: 0 }],
       includeDiscount: false,
-      discountPercentage: "0",
+      discountPercentage: 0,
     },
   });
 
@@ -112,16 +108,19 @@ export function QuoteGenerator() {
   });
 
   useEffect(() => {
-    form.setValue("quoteNumber", generateQuoteNumber());
-    form.setValue("quoteDate", new Date());
-    setIsClient(true);
-  }, [form]);
+    if (isClient) {
+        form.setValue("quoteNumber", generateQuoteNumber());
+        form.setValue("quoteDate", new Date());
+    }
+  }, [form, isClient]);
 
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const watchedItems = form.watch("items");
   const includeDiscount = form.watch("includeDiscount");
-  const discountPercentage =
-    parseInt(form.watch("discountPercentage") || "0", 10) || 0;
+  const discountPercentage = form.watch("discountPercentage") || 0;
 
   const subtotal = watchedItems.reduce(
     (acc, item) => acc + (item.price || 0),
@@ -355,18 +354,9 @@ export function QuoteGenerator() {
                     name="discountPercentage"
                     render={({ field }) => (
                       <FormItem>
+                        <FormLabel>Porcentaje de Descuento (%)</FormLabel>
                         <FormControl>
-                           <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar % de descuento" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="5">5%</SelectItem>
-                                <SelectItem value="10">10%</SelectItem>
-                                <SelectItem value="15">15%</SelectItem>
-                                <SelectItem value="20">20%</SelectItem>
-                            </SelectContent>
-                            </Select>
+                           <Input type="number" placeholder="0" min="0" max="100" {...field} />
                         </FormControl>
                          <FormMessage />
                       </FormItem>
@@ -406,5 +396,3 @@ export function QuoteGenerator() {
     </Card>
   );
 }
-
-    

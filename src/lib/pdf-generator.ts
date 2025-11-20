@@ -236,9 +236,7 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   );
 
   const subtotal = data.items.reduce((acc, item) => acc + item.price, 0);
-  const discountPercentage = data.includeDiscount
-    ? parseInt(data.discountPercentage || "0", 10) || 0
-    : 0;
+  const discountPercentage = data.includeDiscount ? data.discountPercentage || 0 : 0;
   const discountAmount = (subtotal * discountPercentage) / 100;
   const totalAfterDiscount = subtotal - discountAmount;
   const iva = totalAfterDiscount * 0.12;
