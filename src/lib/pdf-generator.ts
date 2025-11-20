@@ -9,7 +9,7 @@ const TEMPLATE_PATH = "/assets/COTICREATI.pdf";
 const EXTRA_TEMPLATE_PATH = "/assets/CotiExtra.pdf";
 const TABLE_DESCRIPTION_X = 85;
 const TABLE_PRICE_X = 505;
-const DESCRIPTION_WIDTH = 360;
+const DESCRIPTION_WIDTH = 320;
 const TABLE_ROW_GAP = 18;
 const TABLE_START_OFFSET = 340;
 const TABLE_BOTTOM_LIMIT = 210;
@@ -26,27 +26,41 @@ const formatCurrency = (amount: number) => {
 };
 
 const wrapText = (text: string, font: PDFFont, fontSize: number, maxWidth: number) => {
-  const words = text.trim().split(/\s+/);
+  const paragraphs = text.split('\n');
   const lines: string[] = [];
-  let current = "";
 
-  words.forEach((word) => {
-    const tentative = current ? `${current} ${word}` : word;
-    const width = font.widthOfTextAtSize(tentative, fontSize);
-    if (width <= maxWidth) {
-      current = tentative;
-      return;
-    }
-
+  paragraphs.forEach(paragraph => {
+    const words = paragraph.trim().split(/\s+/);
+    let current = "";
+  
+    words.forEach((word) => {
+      const tentative = current ? `${current} ${word}` : word;
+      const width = font.widthOfTextAtSize(tentative, fontSize);
+      if (width <= maxWidth) {
+        current = tentative;
+        return;
+      }
+  
+      if (current) {
+        lines.push(current);
+      }
+      current = word;
+    });
+  
     if (current) {
       lines.push(current);
     }
-    current = word;
+    // Add an empty line for paragraph breaks, but not after the last one
+    if (paragraphs.length > 1) {
+        lines.push('');
+    }
   });
-
-  if (current) {
-    lines.push(current);
+  
+  // Remove last empty line if it exists
+  if (lines[lines.length - 1] === '') {
+      lines.pop();
   }
+
 
   return lines;
 };
