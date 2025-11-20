@@ -9,7 +9,7 @@ const TEMPLATE_PATH = "/assets/COTICREATI.pdf";
 const EXTRA_TEMPLATE_PATH = "/assets/CotiExtra.pdf";
 const TABLE_DESCRIPTION_X = 85;
 const TABLE_PRICE_X = 505;
-const DESCRIPTION_WIDTH = 320;
+const DESCRIPTION_WIDTH = 360;
 const TABLE_ROW_GAP = 18;
 const TABLE_START_OFFSET = 340;
 const TABLE_BOTTOM_LIMIT = 210;
@@ -463,7 +463,10 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `cotizacion-${data.quoteNumber}.pdf`;
+  
+  const safeClientName = data.clientName.replace(/[^a-zA-Z0-9\s-]/g, '').replace(/\s+/g, '-');
+  link.download = `${data.quoteNumber}-${safeClientName}.pdf`;
+
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
