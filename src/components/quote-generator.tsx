@@ -171,7 +171,7 @@ export function QuoteGenerator() {
       ? (subtotal * discountPercentage) / 100
       : 0;
   const totalAfterDiscount = subtotal - discountAmount;
-  const iva = totalAfterDiscount * 0.12;
+  const iva = totalAfterDiscount * 0.05;
   const total = totalAfterDiscount + iva;
 
   const onSubmit = async (data: QuoteFormValues) => {
@@ -551,7 +551,7 @@ export function QuoteGenerator() {
                 )}
                 <Separator />
                 <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">IVA (12%)</span>
+                    <span className="text-muted-foreground">IVA (5%)</span>
                     <span className="font-medium">{formatCurrency(iva)}</span>
                 </div>
                  <Separator />
@@ -576,3 +576,5 @@ export function QuoteGenerator() {
     </Card>
   );
 }
+
+    

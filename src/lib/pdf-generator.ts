@@ -133,6 +133,19 @@ const drawFirstPageDetails = (
   const serviceGoalY = 460;
   const serviceIncludesY = 280;
   const commonX = 40;
+  const titleCoti = pageHeight - 116;
+
+  drawLabeledContent(
+    page,
+    fonts,
+    "",
+    data.quoteTitle,
+    commonX+195,
+    titleCoti,
+    
+    width,
+    {valueSize: 18,lineGap: 20},
+  );
 
   drawLabeledContent(
     page,
@@ -409,7 +422,7 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   const discountPercentage = data.includeDiscount ? data.discountPercentage || 0 : 0;
   const discountAmount = (subtotal * discountPercentage) / 100;
   const totalAfterDiscount = subtotal - discountAmount;
-  const iva = totalAfterDiscount * 0.12;
+  const iva = totalAfterDiscount * 0.05;
   const total = totalAfterDiscount + iva;
 
   const totalsRows = [
@@ -421,7 +434,7 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
     totalsRows.push({ label: "", value: formatCurrency(totalAfterDiscount) });
   }
 
-  totalsRows.push({ label: "IVA (12%):", value: formatCurrency(iva) });
+  totalsRows.push({ label: "IVA (5%):", value: formatCurrency(iva) });
   totalsRows.push({ label: "", value: formatCurrency(total), emphasize: true });
 
   drawTotals(lastItemsPage, fonts, totalsRows);
@@ -449,3 +462,5 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
+
+    
