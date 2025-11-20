@@ -66,6 +66,7 @@ const lineItemSchema = z.object({
 });
 
 const quoteSchema = z.object({
+  quoteTitle: z.string().min(1, "El título de la cotización es requerido."),
   quoteNumber: z.string(),
   quoteDate: z.date({ required_error: "La fecha es requerida." }),
   clientName: z.string().min(1, "El nombre del cliente es requerido."),
@@ -122,6 +123,7 @@ export function QuoteGenerator() {
   const form = useForm<QuoteFormValues>({
     resolver: zodResolver(quoteSchema),
     defaultValues: {
+      quoteTitle: "",
       quoteNumber: "",
       quoteDate: undefined,
       clientName: "",
@@ -210,6 +212,19 @@ export function QuoteGenerator() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-8">
+             <FormField
+                control={form.control}
+                name="quoteTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Título de la Cotización</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej. Propuesta de Rediseño Web" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
@@ -561,6 +576,3 @@ export function QuoteGenerator() {
     </Card>
   );
 }
-
-    
-    
