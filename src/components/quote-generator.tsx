@@ -161,7 +161,7 @@ export function QuoteGenerator() {
   const discountPercentage = form.watch("discountPercentage") || 0;
 
   const subtotal = watchedItems.reduce(
-    (acc, item) => acc + (item.price || 0),
+    (acc, item) => acc + (Number(item.price) || 0),
     0
   );
   const discountAmount =
@@ -562,4 +562,5 @@ export function QuoteGenerator() {
   );
 }
 
+    
     
