@@ -4,7 +4,7 @@ import { es } from "date-fns/locale";
 
 import type { QuoteFormValues } from "@/components/quote-generator";
 
-const TEMPLATE_PATH = "/assets/Cotización Creati.ai (2).pdf";
+const TEMPLATE_PATH = "/assets/COTICREATI.pdf";
 const TABLE_DESCRIPTION_X = 85;
 const TABLE_PRICE_X = 505;
 const DESCRIPTION_WIDTH = 360;
