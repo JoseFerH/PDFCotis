@@ -47,10 +47,19 @@ import { generateQuotePdf } from "@/lib/pdf-generator";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "./ui/separator";
 
+const numberFromInput = (value: unknown) => {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  const parsed = typeof value === "number" ? value : parseFloat(String(value));
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
+
 const lineItemSchema = z.object({
   description: z.string().min(1, "La descripción es requerida."),
   price: z.preprocess(
-    (a) => parseFloat(z.string().parse(a)),
+    numberFromInput,
     z.number().positive("El precio debe ser un número positivo.")
   ),
 });
@@ -83,7 +92,7 @@ const quoteSchema = z.object({
   items: z.array(lineItemSchema).min(1, "Debe agregar al menos un ítem."),
   includeDiscount: z.boolean(),
   discountPercentage: z.preprocess(
-    (a) => parseFloat(z.string().parse(a)),
+    numberFromInput,
     z.number().min(0, "El descuento no puede ser negativo.").max(100, "El descuento no puede ser mayor a 100.").optional()
   ).optional(),
 });
@@ -115,6 +124,7 @@ export function QuoteGenerator() {
     resolver: zodResolver(quoteSchema),
     defaultValues: {
       quoteNumber: "",
+      quoteDate: new Date(),
       clientName: "",
       contact: "",
       workDuration: "",
