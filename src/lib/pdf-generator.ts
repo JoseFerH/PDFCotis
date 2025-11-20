@@ -361,17 +361,24 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   }
 
   const templateBytes = await templateResponse.arrayBuffer();
-  const pdfDoc = await PDFDocument.load(templateBytes);
+  const pdfDoc = await PDFDocument.create();
   const templateDoc = await PDFDocument.load(templateBytes);
   const fonts = {
     regular: await pdfDoc.embedFont(StandardFonts.Helvetica),
     bold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
   };
 
+  const [firstTemplatePage] = await pdfDoc.copyPages(templateDoc, [0]);
+  pdfDoc.addPage(firstTemplatePage);
+  const [secondTemplatePage] = await pdfDoc.copyPages(templateDoc, [1]);
+  pdfDoc.addPage(secondTemplatePage);
+  const [thirdTemplatePage] = await pdfDoc.copyPages(templateDoc, [2]);
+  pdfDoc.addPage(thirdTemplatePage);
+  
   const pages = pdfDoc.getPages();
-  const firstPage = pages[0] || (await ensurePage(pdfDoc, templateDoc, 0, 0));
-  const secondPage = pages[1] || (await ensurePage(pdfDoc, templateDoc, 1, 1));
-  const thirdPage = pages[2] || (await ensurePage(pdfDoc, templateDoc, 2, 2));
+  const firstPage = pages[0];
+  const secondPage = pages[1];
+  const thirdPage = pages[2];
   const { height, width } = firstPage.getSize();
 
   drawFirstPageDetails(firstPage, fonts, data, height);
@@ -420,12 +427,7 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
     font: fonts.regular,
     color: rgb(90 / 255, 90 / 255, 90 / 255),
   });
-
-  const form = pdfDoc.getForm();
-  if (form.getFields().length > 0) {
-    form.flatten();
-  }
-
+  
   const pdfBytes = await pdfDoc.save();
   const blob = new Blob([pdfBytes], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
