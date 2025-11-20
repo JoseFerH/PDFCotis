@@ -49,7 +49,151 @@ const wrapText = (text: string, font: PDFFont, fontSize: number, maxWidth: numbe
   return lines;
 };
 
-const drawClientBlock = (
+const drawLabeledContent = (
+  page: PDFPage,
+  fonts: { regular: PDFFont; bold: PDFFont },
+  label: string,
+  value: string,
+  x: number,
+  y: number,
+  width: number,
+  options?: { labelSize?: number; valueSize?: number; lineGap?: number },
+) => {
+  const labelSize = options?.labelSize ?? 11;
+  const valueSize = options?.valueSize ?? 11;
+  const lineGap = options?.lineGap ?? 16;
+  const textColor = rgb(38 / 255, 38 / 255, 38 / 255);
+  const labelColor = rgb(43 / 255, 42 / 255, 76 / 255);
+  const lineHeight = 14;
+
+  const content = value?.trim() ? value : "-";
+
+  page.drawText(label, {
+    x,
+    y,
+    size: labelSize,
+    font: fonts.bold,
+    color: labelColor,
+  });
+
+  const wrapped = wrapText(content, fonts.regular, valueSize, width);
+  wrapped.forEach((line, index) => {
+    page.drawText(line, {
+      x,
+      y: y - labelSize - 4 - index * lineHeight,
+      size: valueSize,
+      font: fonts.regular,
+      color: textColor,
+    });
+  });
+
+  const usedHeight = labelSize + 4 + (wrapped.length - 1) * lineHeight;
+  return y - usedHeight - lineGap;
+};
+
+const drawFirstPageDetails = (
+  page: PDFPage,
+  fonts: { regular: PDFFont; bold: PDFFont },
+  data: QuoteFormValues,
+  pageHeight: number,
+) => {
+  const startX = 85;
+  const width = 440;
+  let currentY = pageHeight - 170;
+
+  currentY = drawLabeledContent(page, fonts, "Cliente", data.clientName, startX, currentY, width, {
+    labelSize: 12,
+  });
+  currentY = drawLabeledContent(
+    page,
+    fonts,
+    "Duración del Trabajo",
+    data.workDuration,
+    startX,
+    currentY,
+    width,
+  );
+  currentY = drawLabeledContent(page, fonts, "Método", data.method, startX, currentY, width);
+  currentY = drawLabeledContent(page, fonts, "Proveedor", data.provider, startX, currentY, width);
+  const formattedDate = data.quoteDate
+    ? format(data.quoteDate, "dd 'de' MMMM yyyy", { locale: es })
+    : "";
+  currentY = drawLabeledContent(
+    page,
+    fonts,
+    "Fecha de Cotización",
+    formattedDate,
+    startX,
+    currentY,
+    width,
+  );
+
+  currentY = drawLabeledContent(
+    page,
+    fonts,
+    "Objetivo del Servicio",
+    data.serviceGoal,
+    startX,
+    currentY - 12,
+    width,
+    { lineGap: 20 },
+  );
+
+  drawLabeledContent(
+    page,
+    fonts,
+    "Lo que Incluye el Servicio",
+    data.serviceIncludes,
+    startX,
+    currentY,
+    width,
+    { lineGap: 0 },
+  );
+};
+
+const drawSecondPageDetails = (
+  page: PDFPage,
+  fonts: { regular: PDFFont; bold: PDFFont },
+  data: QuoteFormValues,
+  pageHeight: number,
+) => {
+  const startX = 85;
+  const width = 440;
+  let currentY = pageHeight - 180;
+
+  currentY = drawLabeledContent(
+    page,
+    fonts,
+    "Tiempo de Entrega",
+    data.deliveryTime,
+    startX,
+    currentY,
+    width,
+  );
+
+  currentY = drawLabeledContent(
+    page,
+    fonts,
+    "Bonus Incluido",
+    data.includedBonus,
+    startX,
+    currentY,
+    width,
+  );
+
+  drawLabeledContent(
+    page,
+    fonts,
+    "¿Por qué hacerlo con Creati Solutions?",
+    data.whyCreati,
+    startX,
+    currentY,
+    width,
+    { lineGap: 0 },
+  );
+};
+
+const drawThirdPageHeader = (
   page: PDFPage,
   fonts: { regular: PDFFont; bold: PDFFont },
   data: QuoteFormValues,
@@ -61,8 +205,8 @@ const drawClientBlock = (
   const whiteColor = rgb(1, 1, 1);
   const leftX = 120;
   const rightX = pageWidth - 230;
-  const baseY = pageHeight - 180;
-  const lineHeight = 22;
+  const baseY = pageHeight - 160;
+  const lineHeight = 18;
 
   page.drawText(data.clientName, {
     x: leftX,
@@ -80,7 +224,9 @@ const drawClientBlock = (
     color: textColor,
   });
 
-  const formattedDate = data.quoteDate ? format(data.quoteDate, "dd 'de' MMMM yyyy", { locale: es }) : '';
+  const formattedDate = data.quoteDate
+    ? format(data.quoteDate, "dd 'de' MMMM yyyy", { locale: es })
+    : "";
 
   page.drawText(data.quoteNumber, {
     x: rightX,
@@ -103,9 +249,10 @@ const ensurePage = async (
   pdfDoc: PDFDocument,
   templateDoc: PDFDocument,
   targetIndex: number,
+  templatePageIndex = 0,
 ) => {
   while (pdfDoc.getPageCount() <= targetIndex) {
-    const [copy] = await pdfDoc.copyPages(templateDoc, [0]);
+    const [copy] = await pdfDoc.copyPages(templateDoc, [templatePageIndex]);
     pdfDoc.addPage(copy);
   }
   return pdfDoc.getPages()[targetIndex];
@@ -118,6 +265,7 @@ const drawItemsTable = async (
   fonts: { regular: PDFFont; bold: PDFFont },
   items: QuoteFormValues["items"],
   pageHeight: number,
+  templatePageIndex = 0,
 ) => {
   let currentPage = page;
   const pages = pdfDoc.getPages();
@@ -133,7 +281,7 @@ const drawItemsTable = async (
     const item = items[index];
     if (index > 0 && index % rowsPerPage === 0) {
       pageIndex += 1;
-      currentPage = await ensurePage(pdfDoc, templateDoc, pageIndex);
+      currentPage = await ensurePage(pdfDoc, templateDoc, pageIndex, templatePageIndex);
       currentY = tableStartY;
     }
 
@@ -221,18 +369,23 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   };
 
   const pages = pdfDoc.getPages();
-  const [firstPage] = pages;
+  const firstPage = pages[0] || (await ensurePage(pdfDoc, templateDoc, 0, 0));
+  const secondPage = pages[1] || (await ensurePage(pdfDoc, templateDoc, 1, 1));
+  const thirdPage = pages[2] || (await ensurePage(pdfDoc, templateDoc, 2, 2));
   const { height, width } = firstPage.getSize();
 
-  drawClientBlock(firstPage, fonts, data, height, width);
+  drawFirstPageDetails(firstPage, fonts, data, height);
+  drawSecondPageDetails(secondPage, fonts, data, height);
+  drawThirdPageHeader(thirdPage, fonts, data, height, width);
 
   const { page: lastItemsPage } = await drawItemsTable(
     pdfDoc,
     templateDoc,
-    firstPage,
+    thirdPage,
     fonts,
     data.items,
     height,
+    2,
   );
 
   const subtotal = data.items.reduce((acc, item) => acc + item.price, 0);
