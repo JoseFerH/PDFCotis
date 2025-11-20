@@ -6,6 +6,7 @@ import { es } from "date-fns/locale";
 import type { QuoteFormValues } from "@/components/quote-generator";
 
 const TEMPLATE_PATH = "/assets/COTICREATI.pdf";
+const EXTRA_TEMPLATE_PATH = "/assets/CotiExtra.pdf";
 const TABLE_DESCRIPTION_X = 85;
 const TABLE_PRICE_X = 505;
 const DESCRIPTION_WIDTH = 360;
@@ -284,32 +285,30 @@ const ensurePage = async (
 const drawItemsTable = async (
   pdfDoc: PDFDocument,
   templateDoc: PDFDocument,
+  extraTemplateDoc: PDFDocument,
   page: PDFPage,
   fonts: { regular: PDFFont; bold: PDFFont },
-  items: QuoteFormValues["items"],
+  data: QuoteFormValues,
   pageHeight: number,
-  templatePageIndex = 0,
+  pageWidth: number,
 ) => {
   let currentPage = page;
-  const pages = pdfDoc.getPages();
+  let pageIndex = pdfDoc.getPages().indexOf(page);
   const tableStartY = pageHeight - TABLE_START_OFFSET;
-  const availableHeight = tableStartY - TABLE_BOTTOM_LIMIT;
-  const rowsPerPage = Math.max(1, Math.floor(availableHeight / TABLE_ROW_GAP));
+  let currentY = tableStartY;
   const descriptionLineHeight = 13;
   const textColor = rgb(32 / 255, 32 / 255, 32 / 255);
-  let currentY = tableStartY;
-  let pageIndex = pages.indexOf(page);
 
-  for (let index = 0; index < items.length; index += 1) {
-    const item = items[index];
-    if (index > 0 && index % rowsPerPage === 0) {
-      pageIndex += 1;
-      currentPage = await ensurePage(pdfDoc, templateDoc, pageIndex, templatePageIndex);
-      currentY = tableStartY;
-    }
-
+  for (const item of data.items) {
     const lines = wrapText(item.description, fonts.regular, 11, DESCRIPTION_WIDTH);
     const blockHeight = Math.max(descriptionLineHeight * lines.length, TABLE_ROW_GAP);
+
+    if (currentY - blockHeight < TABLE_BOTTOM_LIMIT) {
+      pageIndex++;
+      currentPage = await ensurePage(pdfDoc, extraTemplateDoc, pageIndex, 0);
+      drawThirdPageHeader(currentPage, fonts, data, pageHeight, pageWidth);
+      currentY = tableStartY;
+    }
 
     lines.forEach((line, lineIndex) => {
       currentPage.drawText(line, {
@@ -322,7 +321,7 @@ const drawItemsTable = async (
     });
 
     const priceText = `${item.isEstimate ? '*' : ''}${formatCurrency(item.price)}`;
-    const priceWidth = fonts.regular.widthOfTextAtSize(priceText, 11);
+    const priceWidth = fonts.bold.widthOfTextAtSize(priceText, 11);
     currentPage.drawText(priceText, {
       x: TABLE_PRICE_X - priceWidth,
       y: currentY,
@@ -334,7 +333,7 @@ const drawItemsTable = async (
     currentY -= blockHeight + 5;
   }
 
-  return { page: currentPage, y: Math.max(currentY, TABLE_BOTTOM_LIMIT) };
+  return { page: currentPage, y: currentY };
 };
 
 const drawTotals = (
@@ -382,10 +381,17 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   if (!templateResponse.ok) {
     throw new Error("No se pudo cargar la plantilla base de la cotización.");
   }
-
   const templateBytes = await templateResponse.arrayBuffer();
+
+  const extraTemplateResponse = await fetch(EXTRA_TEMPLATE_PATH);
+  if (!extraTemplateResponse.ok) {
+    throw new Error("No se pudo cargar la plantilla extra de la cotización.");
+  }
+  const extraTemplateBytes = await extraTemplateResponse.arrayBuffer();
+
   const pdfDoc = await PDFDocument.create();
   const templateDoc = await PDFDocument.load(templateBytes);
+  const extraTemplateDoc = await PDFDocument.load(extraTemplateBytes);
   const fonts = {
     regular: await pdfDoc.embedFont(StandardFonts.Helvetica),
     bold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
@@ -411,11 +417,12 @@ export const generateQuotePdf = async (data: QuoteFormValues) => {
   const { page: lastItemsPage } = await drawItemsTable(
     pdfDoc,
     templateDoc,
+    extraTemplateDoc,
     thirdPage,
     fonts,
-    data.items,
+    data,
     height,
-    2,
+    width,
   );
 
   const subtotal = data.items.reduce((acc, item) => acc + item.price, 0);
